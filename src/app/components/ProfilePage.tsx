@@ -1,5 +1,7 @@
-import { ChevronRight, Store, BarChart3, Briefcase, Wallet, Gift, Settings, Bell, Shield, CreditCard, FileText, Award } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronRight, Store, BarChart3, Briefcase, Wallet, Gift, Settings, Bell, Shield, CreditCard, FileText, Award, Star, UserCircle } from 'lucide-react';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
+import { RatingModal } from '@/app/components/RatingModal';
 
 // 用户信息数据
 const userInfo = {
@@ -42,7 +44,9 @@ const orders = [
     status: 'paid',
     statusText: '已付款',
     statusColor: 'text-orange-600 bg-orange-50',
-    hasException: false
+    hasException: false,
+    escortName: '张小明',
+    hasRated: false
   },
   {
     id: 'ORD20260131002',
@@ -54,7 +58,9 @@ const orders = [
     status: 'received',
     statusText: '已接单',
     statusColor: 'text-blue-600 bg-blue-50',
-    hasException: false
+    hasException: false,
+    escortName: '李芳',
+    hasRated: false
   },
   {
     id: 'ORD20260131003',
@@ -66,7 +72,9 @@ const orders = [
     status: 'completed',
     statusText: '已完成',
     statusColor: 'text-green-600 bg-green-50',
-    hasException: false
+    hasException: false,
+    escortName: '王强',
+    hasRated: true
   },
   {
     id: 'ORD20260131004',
@@ -79,7 +87,9 @@ const orders = [
     statusText: '已退款',
     statusColor: 'text-gray-600 bg-gray-50',
     hasException: true,
-    exceptionReason: '异常原因：用户买错了，已退款'
+    exceptionReason: '异常原因：用户买错了，已退款',
+    escortName: '刘洋',
+    hasRated: false
   },
   {
     id: 'ORD20260131005',
@@ -91,7 +101,9 @@ const orders = [
     status: 'completed',
     statusText: '已完成',
     statusColor: 'text-green-600 bg-green-50',
-    hasException: false
+    hasException: false,
+    escortName: '陈美玲',
+    hasRated: false
   }
 ];
 
@@ -100,6 +112,14 @@ interface ProfilePageProps {
 }
 
 export function ProfilePage({ onOrderClick }: ProfilePageProps) {
+  const [ratingModalOpen, setRatingModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<{ id: string; escortName: string } | null>(null);
+
+  const handleRateClick = (orderId: string, escortName: string) => {
+    setSelectedOrder({ id: orderId, escortName });
+    setRatingModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* 用户信息区域 */}
@@ -205,35 +225,71 @@ export function ProfilePage({ onOrderClick }: ProfilePageProps) {
               <div className="p-3">
                 <div className="flex gap-3">
                   {/* 商品图片 */}
-                  <ImageWithFallback
-                    src={order.productImage}
-                    alt={order.productName}
-                    className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
-                  />
+                  <div className="relative flex-shrink-0">
+                    <ImageWithFallback
+                      src={order.productImage}
+                      alt={order.productName}
+                      className="w-24 h-24 rounded-lg object-cover"
+                    />
+                  </div>
 
                   {/* 订单信息 */}
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm text-gray-800 font-medium mb-1 line-clamp-1">
+                  <div className="flex-1 min-w-0 flex flex-col">
+                    {/* 商品名称 */}
+                    <h4 className="text-sm text-gray-800 font-semibold mb-1.5 line-clamp-2 leading-snug">
                       {order.productName}
                     </h4>
-                    <p className="text-xs text-gray-500 mb-1">
-                      下单游戏ID: {order.gameId}
-                    </p>
-                    <p className="text-xs text-gray-400 mb-2">
-                      {order.orderTime}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-base font-bold text-red-600">
-                        ¥{order.amount}
+                    
+                    {/* 游戏ID */}
+                    <div className="flex items-center gap-1 mb-1.5">
+                      <span className="text-xs text-gray-400">ID:</span>
+                      <span className="text-xs text-gray-600">{order.gameId}</span>
+                    </div>
+                    
+                    {/* 日期和护航员 */}
+                    <div className="flex items-center justify-between mb-auto">
+                      <span className="text-xs text-gray-400">
+                        {order.orderTime}
                       </span>
+                      <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 rounded-md">
+                        <UserCircle className="h-3 w-3 text-blue-500" />
+                        <span className="text-xs text-gray-500">护航员:</span>
+                        <span className="text-xs text-blue-600 font-medium">{order.escortName}</span>
+                      </div>
+                    </div>
+                    
+                    {/* 价格和操作按钮 */}
+                    <div className="flex items-end justify-between mt-2 pt-2 border-t border-gray-100">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-xs text-gray-400">¥</span>
+                        <span className="text-lg font-bold text-red-600">{order.amount}</span>
+                      </div>
+                      {order.status === 'completed' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRateClick(order.id, order.escortName);
+                          }}
+                          className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                            order.hasRated
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white shadow-sm hover:shadow-md'
+                          }`}
+                          disabled={order.hasRated}
+                        >
+                          <Star className={`h-3.5 w-3.5 ${order.hasRated ? '' : 'fill-white'}`} />
+                          {order.hasRated ? '已评价' : '去评价'}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
 
                 {/* 异常提示 */}
                 {order.hasException && order.exceptionReason && (
-                  <div className="mt-3 px-3 py-2 bg-red-50 border border-red-100 rounded-lg">
-                    <p className="text-xs text-red-600">
+                  <div className="mt-3 px-3 py-2 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2">
+                    <Shield className="h-3.5 w-3.5 text-red-500 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-red-600 flex-1">
                       {order.exceptionReason}
                     </p>
                   </div>
@@ -251,6 +307,16 @@ export function ProfilePage({ onOrderClick }: ProfilePageProps) {
           <span>您的信息受到严格保护</span>
         </div>
       </div>
+
+      {/* 评价弹窗 */}
+      {selectedOrder && (
+        <RatingModal
+          isOpen={ratingModalOpen}
+          onClose={() => setRatingModalOpen(false)}
+          escortName={selectedOrder.escortName}
+          orderId={selectedOrder.id}
+        />
+      )}
     </div>
   );
 }
