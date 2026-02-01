@@ -3,23 +3,41 @@ import { Home, ShoppingCart, User, Heart, Search, Keyboard, Mouse, Headphones, M
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { ProductDetail } from '@/app/components/ProductDetail';
 import { ProfilePage } from '@/app/components/ProfilePage';
+import { RankingCard } from '@/app/components/RankingCard';
+
+// 榜单活动数据
+const rankingData = {
+  userName: '权威之子',
+  userAvatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400',
+  ranking: 19423,
+  testimonial: '感谢大家对我的信任，我喜欢这个平台。',
+  likedByAvatars: [
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+    'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400'
+  ],
+  likedByNames: ['难言', '小明', '王芳'],
+  totalLikes: 3211
+};
 
 // Banner数据 - 三个横向滑动的卡片
 const banners = [
   {
     id: 1,
-    image: 'https://images.unsplash.com/photo-1767455471543-055dbc6c6700?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlc3BvcnRzJTIwY29tcGV0aXRpb24lMjBnYW1pbmd8ZW58MXx8fHwxNzY5NTk0NzkyfDA&ixlib=rb-4.1.0&q=80&w=1080',
-    title: '电竞赛事',
-    subtitle: '职业装备推荐'
+    type: 'ranking' as const, // 特殊类型：榜单活动
+    title: '榜单活动',
+    subtitle: '实力老板排行榜'
   },
   {
     id: 2,
+    type: 'image' as const,
     image: 'https://images.unsplash.com/photo-1628089700970-0012c5718efc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnYW1pbmclMjBzZXR1cCUyMHJnYiUyMGxpZ2h0c3xlbnwxfHx8fDE3Njk2MjExMjd8MA&ixlib=rb-4.1.0&q=80&w=1080',
     title: '游戏装备',
     subtitle: '打造专属战场'
   },
   {
     id: 3,
+    type: 'image' as const,
     image: 'https://images.unsplash.com/photo-1759701547467-a54a5e86a4f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlc3BvcnRzJTIwdG91cm5hbWVudCUyMGFyZW5hfGVufDF8fHx8MTc2OTU4NjUxN3ww&ixlib=rb-4.1.0&q=80&w=1080',
     title: '限时优��',
     subtitle: '全场5折起'
@@ -425,18 +443,24 @@ export default function App() {
                   index === currentBannerIndex ? 'opacity-100' : 'opacity-0'
                 }`}
               >
-                <div className="relative h-full rounded-lg overflow-hidden shadow-sm">
-                  <ImageWithFallback 
-                    src={banner.image} 
-                    alt={banner.title}
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-2">
-                    <h3 className="text-white text-sm mb-0.5">{banner.title}</h3>
-                    <p className="text-gray-200 text-xs">{banner.subtitle}</p>
+                {banner.type === 'ranking' ? (
+                  // 榜单活动卡片
+                  <RankingCard {...rankingData} />
+                ) : (
+                  // 普通图片banner
+                  <div className="relative h-full rounded-lg overflow-hidden shadow-sm">
+                    <ImageWithFallback 
+                      src={banner.image!} 
+                      alt={banner.title}
+                      className="h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-2">
+                      <h3 className="text-white text-sm mb-0.5">{banner.title}</h3>
+                      <p className="text-gray-200 text-xs">{banner.subtitle}</p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             ))}
             
