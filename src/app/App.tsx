@@ -4,6 +4,7 @@ import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { ProductDetail } from '@/app/components/ProductDetail';
 import { ProfilePage } from '@/app/components/ProfilePage';
 import { RankingCard } from '@/app/components/RankingCard';
+import { RankingModal } from '@/app/components/RankingModal';
 
 // 榜单活动数据
 const rankingData = {
@@ -201,6 +202,7 @@ export default function App() {
   const [selectedProduct, setSelectedProduct] = useState<typeof products[0] | null>(null);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [currentNotificationIndex, setCurrentNotificationIndex] = useState(0);
+  const [isRankingModalOpen, setIsRankingModalOpen] = useState(false);
   const categoryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const observerRef = useRef<IntersectionObserver | null>(null);
 
@@ -298,6 +300,13 @@ export default function App() {
       setSelectedCategory(categoryName);
       setVisibleCategory(categoryName);
     }
+  };
+
+  // 处理打榜提交
+  const handleRankingSubmit = (message: string) => {
+    console.log('打榜宣言:', message);
+    // TODO: 这里可以添加实际的API调用
+    alert('打榜成功！你的宣言已提交。');
   };
 
   // 如果选中了商品，显示商品详情页
@@ -496,7 +505,10 @@ export default function App() {
             </button>
             
             {/* 活动2：打榜对掏 */}
-            <button className="relative flex-1 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg overflow-hidden shadow-sm border border-purple-200">
+            <button 
+              onClick={() => setIsRankingModalOpen(true)}
+              className="relative flex-1 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg overflow-hidden shadow-sm border border-purple-200 active:scale-95 transition-transform"
+            >
               {/* 红点提示 */}
               <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse shadow-lg z-10"></div>
               
@@ -818,6 +830,13 @@ export default function App() {
           </button>
         </div>
       </div>
+
+      {/* 打榜弹窗 */}
+      <RankingModal
+        isOpen={isRankingModalOpen}
+        onClose={() => setIsRankingModalOpen(false)}
+        onSubmit={handleRankingSubmit}
+      />
     </div>
   );
 }
